@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
-import seaborn as sn
+import seaborn as sns
 from sklearn.metrics import confusion_matrix
 import matplotlib.mlab as mlab
 # %matplotlib inline
+import plotly.figure_factory as ff
 
 import streamlit as st 
 from streamlit_option_menu import option_menu
@@ -21,9 +22,20 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 
+# text to speech library
+
+# import pyttsx3
+# engine=pyttsx3.init()
+# engine.say("Heart Disease Prediction System")
+# engine.say("By Amare Abayneh")
+# engine.say("ID: PRAMIT/010/14")
+# engine.runAndWait()
+# if engine._inLoop:
+#     engine.endLoop()
+
 class heart_prediction:
     def __init__(self) -> None:
-        # pass
+
         @st.cache(allow_output_mutation=True)
         def get_base64_of_bin_file(bin_file):
             with open(bin_file, 'rb') as f:
@@ -79,7 +91,7 @@ class heart_prediction:
                 styles={
                 "container": {"padding": "0!important", "background-color": "#000033"},
                 "icon": {"color": "orange", "font-size": "20px"}, 
-                "nav-link": {"font-size": "20px", "text-align": "left", "margin":"0px", "--hover-color": "gray",
+                "nav-link": {"font-size": "18px", "text-align": "left", "margin":"0px", "--hover-color": "gray",
                             "color":"white"  },
                 "nav-link-selected": {"background-color": "green","color":"white"},
             }
@@ -101,6 +113,7 @@ class heart_prediction:
                 """)
             
         elif selected=="Prediction":
+            
 
             choice=["Prediction","EDA","Dataset Description"]
             task=st.sidebar.selectbox("Select Activity",options=choice)
@@ -146,10 +159,6 @@ class heart_prediction:
 
                 btn_col1,btn_col2=st.columns(2)
                 if btn_col1.button("Predict"):
-                    # ss=StandardScaler()
-                    # pkl_knn_model=jb.load('xxx')
-                    # pkl_knn_model=pk.load(open('model/knn_heart_model.pkl','rb'))
-                    # ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach','exang', 'oldpeak', 'slope', 'ca', 'thal']
                     if gender=="Male":
                         gender=1
                     else:
@@ -199,23 +208,46 @@ class heart_prediction:
                         thal=3
 
 
-                    pkl_knn_model1=jb.load("heart.joblib")                    
-
+                    pkl_knn_model1=jb.load("heart_model.jb")                    
                     result = pkl_knn_model1.predict(self.st.transform([[age,gender,cp,bp,chol,fbs,rest_ecg,thalach,exang,old_peak,slope,ca,thal]]))
+                    # global engine
                     if result== [0]:
+                        
                         st.success("This person has not heart disease")
                     else:
-                        st.error("This person has heart disease ")
+                        
+                        st.error("This person has heart disease")
+
+
 
             elif task=='EDA':
+                st.set_option('deprecation.showPyplotGlobalUse', False)
                 heart_df=pd.read_csv("heart dataset after prep/heart_dataset.csv")
                 st.header("Exploratory Data Analysis")
-                st.line_chart(heart_df)
-                st.area_chart(heart_df)
-                st.bar_chart(heart_df)
 
-                plt.hist(heart_df,bins=20)
-                st.pyplot()
+                df=pd.DataFrame(heart_df[:20],columns=["age","sex","target"])
+                df.hist()
+                plt.show()
+                st.pyplot()            
+
+
+                st.line_chart(heart_df[:10])
+                # st.area_chart(heart_df)
+                # plt.hist(heart_df,bins=20)
+                # st.bar_chart(heart_df)
+                st.bar_chart(heart_df[:10])
+
+                fig,ax=plt.subplots()
+                ax.hist(heart_df[:20],bins=20)
+                st.pyplot(fig)
+
+                # hist_data=[df["age"],df["sex"]]
+                # group_labels=['age',"sex"]
+                # fig=ff.create_distplot(heart_df,group_labels,bin_size=[10,20])
+                # st.plotly_chart(fig,user_container_width=True)
+
+
+
 
 
             elif task=='Dataset Description':
